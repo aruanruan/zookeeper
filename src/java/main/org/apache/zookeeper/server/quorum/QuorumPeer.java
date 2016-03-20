@@ -1030,7 +1030,8 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 switch (getPeerState()) {
                 case LOOKING:
                     LOG.info("LOOKING");
-
+                    //aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_LOOKING_ENTER, this);
                     if (Boolean.getBoolean("readonlymode.enabled")) {
                         LOG.info("Attempting to start ReadOnlyZooKeeperServer");
 
@@ -1089,8 +1090,12 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                             setPeerState(ServerState.LOOKING);
                         }                        
                     }
+                  //aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_LOOKING_LEAVE, this);
                     break;
                 case OBSERVING:
+                	//aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_OBSERVING_ENTER, this);
                     try {
                         LOG.info("OBSERVING");
                         setObserver(makeObserver(logFactory));
@@ -1102,8 +1107,12 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         setObserver(null);  
                        updateServerState();
                     }
+                  //aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_OBSERVING_LEAVE, this);
                     break;
                 case FOLLOWING:
+                	//aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_FOLLOWING_ENTER, this);
                     try {
                        LOG.info("FOLLOWING");
                         setFollower(makeFollower(logFactory));
@@ -1115,8 +1124,12 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        setFollower(null);
                        updateServerState();
                     }
+                  //aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_FOLLOWING_LEAVE, this);
                     break;
                 case LEADING:
+                	//aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_LEADING_ENTER, this);
                     LOG.info("LEADING");
                     try {
                         setLeader(makeLeader(logFactory));
@@ -1131,6 +1144,8 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         }
                         updateServerState();
                     }
+                  //aruan 2016/3/20
+                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.STS_LEADING_LEAVE, this);
                     break;
                 }
                 start_fle = Time.currentElapsedTime();

@@ -219,10 +219,16 @@ public class QuorumPeerConfig {
         int secureClientPort = 0;
         String clientPortAddress = null;
         String secureClientPortAddress = null;
+        //aruan 2016/3/20
+        String stateListenerTypes = null;
         VerifyingFileFactory vff = new VerifyingFileFactory.Builder(LOG).warnForRelativePath().build();
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
             String key = entry.getKey().toString().trim();
             String value = entry.getValue().toString().trim();
+            //aruan 2016/3/20
+            if(key.equals("stateListener")){
+            	stateListenerTypes = value.trim();
+            }else
             if (key.equals("dataDir")) {
                 dataDir = vff.create(value);
             } else if (key.equals("dataLogDir")) {
@@ -352,7 +358,14 @@ public class QuorumPeerConfig {
                 backupOldConfig();
             }
         }
+        
+        //aruan 2016/3/20
+        if(stateListenerTypes != null && stateListenerTypes.length() > 0){
+        	QuorumStateHelper.getInstance().initialize(stateListenerTypes, zkProp, this);
+        }
     }
+    
+   
 
     /**
      * Backward compatibility -- It would backup static config file on bootup
