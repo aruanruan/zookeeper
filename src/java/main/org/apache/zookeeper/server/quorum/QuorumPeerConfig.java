@@ -27,10 +27,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -592,6 +596,24 @@ public class QuorumPeerConfig {
         File myIdFile = new File(dataDir, "myid");
         // standalone server doesn't need myid file.
         if (!myIdFile.isFile()) {
+        	//aruan 2016/3/20, why not use netinterface  enumerate the server id?
+        	Enumeration<NetworkInterface> intfs = NetworkInterface.getNetworkInterfaces();
+        	while(intfs.hasMoreElements()){
+        		NetworkInterface intf = intfs.nextElement();
+        		for(InterfaceAddress addr : intf.getInterfaceAddresses()){
+        			if(addr.getAddress() instanceof Inet4Address){
+        				InetAddress inet4addr = addr.getAddress();
+        				for(Map.Entry<Long, QuorumServer> entry : this.quorumVerifier.getAllMembers().entrySet()){
+        					if(entry.getValue().addr.getAddress().equals(inet4addr)){
+        						 serverId = entry.getKey().longValue();
+        				         MDC.put("myid", String.valueOf(serverId));
+        				         LOG.info("got server id " + serverId + " by networkinterface enumeration");
+        				         return;
+        					}
+        				}
+        			}
+        		}
+        	}
             return;
         }
         BufferedReader br = new BufferedReader(new FileReader(myIdFile));
