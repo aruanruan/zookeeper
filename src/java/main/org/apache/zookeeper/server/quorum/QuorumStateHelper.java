@@ -37,7 +37,7 @@ public final class QuorumStateHelper {
     	}
     }
     
-    public void stateChanged(int state, QuorumPeer peer){
+    public void stateChanged(QuorumStateListener.State state, QuorumPeer peer){
     	if(stateListeners != null && !stateListeners.isEmpty()){
     		for(QuorumStateListener listener : this.stateListeners){
     			listener.stateChanged(state, peer);
