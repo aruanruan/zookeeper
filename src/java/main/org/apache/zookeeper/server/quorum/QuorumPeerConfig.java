@@ -597,22 +597,24 @@ public class QuorumPeerConfig {
         // standalone server doesn't need myid file.
         if (!myIdFile.isFile()) {
         	//aruan 2016/3/20, why not use netinterface  enumerate the server id?
-        	Enumeration<NetworkInterface> intfs = NetworkInterface.getNetworkInterfaces();
-        	while(intfs.hasMoreElements()){
-        		NetworkInterface intf = intfs.nextElement();
-        		for(InterfaceAddress addr : intf.getInterfaceAddresses()){
-        			if(addr.getAddress() instanceof Inet4Address){
-        				InetAddress inet4addr = addr.getAddress();
-        				for(Map.Entry<Long, QuorumServer> entry : this.quorumVerifier.getAllMembers().entrySet()){
-        					if(entry.getValue().addr.getAddress().equals(inet4addr)){
-        						 serverId = entry.getKey().longValue();
-        				         MDC.put("myid", String.valueOf(serverId));
-        				         LOG.info("got server id " + serverId + " by networkinterface enumeration");
-        				         return;
-        					}
-        				}
-        			}
-        		}
+        	if(isDistributed()){
+	        	Enumeration<NetworkInterface> intfs = NetworkInterface.getNetworkInterfaces();
+	        	while(intfs.hasMoreElements()){
+	        		NetworkInterface intf = intfs.nextElement();
+	        		for(InterfaceAddress addr : intf.getInterfaceAddresses()){
+	        			if(addr.getAddress() instanceof Inet4Address){
+	        				InetAddress inet4addr = addr.getAddress();
+	        				for(Map.Entry<Long, QuorumServer> entry : this.quorumVerifier.getAllMembers().entrySet()){
+	        					if(entry.getValue().addr.getAddress().equals(inet4addr)){
+	        						 serverId = entry.getKey().longValue();
+	        				         MDC.put("myid", String.valueOf(serverId));
+	        				         LOG.info("got server id " + serverId + " by networkinterface enumeration");
+	        				         return;
+	        					}
+	        				}
+	        			}
+	        		}
+	        	}
         	}
             return;
         }
