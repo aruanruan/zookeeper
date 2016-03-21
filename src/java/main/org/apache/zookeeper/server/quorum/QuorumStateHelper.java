@@ -26,7 +26,7 @@ public final class QuorumStateHelper {
     		try{
         		Class<?> type = Class.forName(s);
         		QuorumStateListener instance = (QuorumStateListener) type.newInstance();
-        		instance.initialize(zkProp, config);
+        		instance.startup(zkProp, config);
         		if(stateListeners == null){
         			stateListeners = new ArrayList<QuorumStateListener>();
         		}
