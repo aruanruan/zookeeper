@@ -21,6 +21,7 @@ public interface QuorumStateListener {
 		LEADING_ENTER,
 		LEADING_LEAVE
 	}
-	public void initialize(Properties zkProp, QuorumPeerConfig config);
+	public void startup(Properties zkProp, QuorumPeerConfig config);
+	public void shutdown();
 	public void stateChanged(State state, QuorumPeer peer);
 }
