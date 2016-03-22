@@ -72,14 +72,14 @@ public class QuorumStateListenerProxy implements QuorumStateListener {
 
 	 
 	@Override
-	public void startup(Properties zkProp, QuorumPeerConfig config) {
+	public void initialize(Properties zkProp, QuorumPeerConfig config) {
 		if(proxies != null && !proxies.isEmpty()){
 			for(QuorumStateListener listener : proxies){
-				listener.startup(zkProp, config);
+				listener.initialize(zkProp, config);
 			}
 		}
 		if(chain != null){
-			chain.startup(zkProp, config);
+			chain.initialize(zkProp, config);
 		}
 	}
 
@@ -92,6 +92,18 @@ public class QuorumStateListenerProxy implements QuorumStateListener {
 		}
 		if(chain != null){
 			chain.shutdown();
+		}
+	}
+	
+	@Override
+	public void startup() {
+		if(proxies != null && !proxies.isEmpty()){
+			for(QuorumStateListener listener : proxies){
+				listener.startup();
+			}
+		}
+		if(chain != null){
+			chain.startup();
 		}
 	}
 

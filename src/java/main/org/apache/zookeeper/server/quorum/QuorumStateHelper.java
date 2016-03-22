@@ -18,6 +18,27 @@ public final class QuorumStateHelper {
     	return this.stateListeners;
     }
     
+    static final int TYPE_EXIT = -1;
+    static final int TYPE_STARTUP = 1;
+    static final int TYPE_SHUTDOWN = 3;
+    static final int TYPE_STATECHANGED = 2;
+    static class Message{
+    	int type;
+    	QuorumStateListener.State state;
+    	QuorumPeer peer;
+    	
+    	Message(int type){this.type = type;}
+    	Message(QuorumStateListener.State state,
+    			QuorumPeer peer){
+    		this.type = TYPE_STATECHANGED;
+    		this.state = state;
+    		this.peer = peer;
+    	}
+    }
+    
+    Thread thread;
+    private java.util.concurrent.BlockingDeque<Message> messages = new java.util.concurrent.LinkedBlockingDeque<Message>();
+    
     public void initialize(String types,  Properties zkProp, QuorumPeerConfig config) throws ConfigException{
     	String [] listeners = types.split(",");
     	for(String listener : listeners){
@@ -26,7 +47,7 @@ public final class QuorumStateHelper {
     		try{
         		Class<?> type = Class.forName(s);
         		QuorumStateListener instance = (QuorumStateListener) type.newInstance();
-        		instance.startup(zkProp, config);
+        		instance.initialize(zkProp, config);
         		if(stateListeners == null){
         			stateListeners = new ArrayList<QuorumStateListener>();
         		}
@@ -39,9 +60,63 @@ public final class QuorumStateHelper {
     
     public void stateChanged(QuorumStateListener.State state, QuorumPeer peer){
     	if(stateListeners != null && !stateListeners.isEmpty()){
-    		for(QuorumStateListener listener : this.stateListeners){
-    			listener.stateChanged(state, peer);
-    		}
+    		if(stateListeners != null && !stateListeners.isEmpty()){
+        		Message message = new Message(state, peer);
+        		messages.offer(message);
+        	}
+    	}
+    }
+    
+    public void startup(){
+    	if(stateListeners != null && !stateListeners.isEmpty()){
+    		thread = new Thread(new Runnable(){
+
+				@Override
+				public void run() {
+					Message message = null;
+					while(true){
+						try {
+							message = messages.take();
+						} catch (InterruptedException e) {
+						}
+						if(message == null) continue;
+						if(message.type == TYPE_EXIT)break;
+						if(message.type == TYPE_STARTUP){
+				    		for(QuorumStateListener listener : stateListeners){
+				    			listener.startup();
+				    		}
+						}else if(message.type == TYPE_SHUTDOWN){
+							for(QuorumStateListener listener : stateListeners){
+				    			listener.shutdown();
+				    		}
+						}else if(message.type == TYPE_STATECHANGED){
+							for(QuorumStateListener listener : stateListeners){
+				    			listener.stateChanged(message.state, message.peer);
+				    		}
+						}
+					}
+				}
+    			
+    		});
+    		thread.start();
+    		Message message = new Message(TYPE_STARTUP);
+    		messages.offer(message);
+    	}
+    }
+    
+    public void shutdown(){
+    	if(stateListeners != null && !stateListeners.isEmpty()){
+    		messages.clear();
+    		Message message = new Message(TYPE_SHUTDOWN);
+    		messages.offer(message);
+    		
+    		message = new Message(TYPE_EXIT);
+     		messages.offer(message);
+     		try {
+				thread.join();
+			} catch (InterruptedException e) {
+			}
+     		messages.clear();
     	}
     }
 }

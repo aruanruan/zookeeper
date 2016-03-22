@@ -1022,6 +1022,8 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             jmxQuorumBean = null;
         }
 
+        QuorumStateHelper stateInstance = QuorumStateHelper.getInstance();
+        stateInstance.startup();
         try {
             /*
              * Main loop
@@ -1031,7 +1033,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                 case LOOKING:
                     LOG.info("LOOKING");
                     //aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.LOOKING_ENTER, this);
+                    stateInstance.stateChanged(QuorumStateListener.State.LOOKING_ENTER, this);
                     if (Boolean.getBoolean("readonlymode.enabled")) {
                         LOG.info("Attempting to start ReadOnlyZooKeeperServer");
 
@@ -1091,11 +1093,11 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         }                        
                     }
                   //aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.LOOKING_LEAVE, this);
+                    stateInstance.stateChanged(QuorumStateListener.State.LOOKING_LEAVE, this);
                     break;
                 case OBSERVING:
                 	//aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.OBSERVING_ENTER, this);
+                	stateInstance.stateChanged(QuorumStateListener.State.OBSERVING_ENTER, this);
                     try {
                         LOG.info("OBSERVING");
                         setObserver(makeObserver(logFactory));
@@ -1108,11 +1110,11 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        updateServerState();
                     }
                   //aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.OBSERVING_LEAVE, this);
+                    stateInstance.stateChanged(QuorumStateListener.State.OBSERVING_LEAVE, this);
                     break;
                 case FOLLOWING:
                 	//aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.FOLLOWING_ENTER, this);
+                	stateInstance.stateChanged(QuorumStateListener.State.FOLLOWING_ENTER, this);
                     try {
                        LOG.info("FOLLOWING");
                         setFollower(makeFollower(logFactory));
@@ -1125,11 +1127,11 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        updateServerState();
                     }
                   //aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.FOLLOWING_LEAVE, this);
+                    stateInstance.stateChanged(QuorumStateListener.State.FOLLOWING_LEAVE, this);
                     break;
                 case LEADING:
                 	//aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.LEADING_ENTER, this);
+                	stateInstance.stateChanged(QuorumStateListener.State.LEADING_ENTER, this);
                     LOG.info("LEADING");
                     try {
                         setLeader(makeLeader(logFactory));
@@ -1145,13 +1147,14 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                         updateServerState();
                     }
                   //aruan 2016/3/20
-                    QuorumStateHelper.getInstance().stateChanged(QuorumStateListener.State.LEADING_LEAVE, this);
+                    stateInstance.stateChanged(QuorumStateListener.State.LEADING_LEAVE, this);
                     break;
                 }
                 start_fle = Time.currentElapsedTime();
             }
         } finally {
             LOG.warn("QuorumPeer main thread exited");
+            stateInstance.shutdown();
             MBeanRegistry instance = MBeanRegistry.getInstance();
             instance.unregister(jmxQuorumBean);
             instance.unregister(jmxLocalPeerBean);

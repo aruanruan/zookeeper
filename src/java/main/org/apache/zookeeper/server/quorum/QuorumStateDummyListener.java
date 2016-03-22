@@ -11,7 +11,7 @@ public class QuorumStateDummyListener implements QuorumStateListener {
 	private Logger LOG = LoggerFactory.getLogger(QuorumStateDummyListener.class);
 	Timer timer;
 	@Override
-	public void startup(Properties zkProp, QuorumPeerConfig config) {
+	public void initialize(Properties zkProp, QuorumPeerConfig config) {
 		LOG.info("initialize....");
 	}
 
@@ -32,6 +32,11 @@ public class QuorumStateDummyListener implements QuorumStateListener {
 				timer = null;
 			}
 		}
+	}
+	
+	@Override
+	public void startup() {
+		
 	}
 
 	@Override
