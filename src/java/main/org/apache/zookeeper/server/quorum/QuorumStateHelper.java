@@ -60,10 +60,8 @@ public final class QuorumStateHelper {
     
     public void stateChanged(QuorumStateListener.State state, QuorumPeer peer){
     	if(stateListeners != null && !stateListeners.isEmpty()){
-    		if(stateListeners != null && !stateListeners.isEmpty()){
-        		Message message = new Message(state, peer);
-        		messages.offer(message);
-        	}
+    		Message message = new Message(state, peer);
+    		messages.offer(message);
     	}
     }
     

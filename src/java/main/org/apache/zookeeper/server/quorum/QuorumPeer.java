@@ -1088,11 +1088,11 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                                }
                             setCurrentVote(makeLEStrategy().lookForLeader());
                         } catch (Exception e) {
-                            LOG.warn("Unexpected exception", e);
+                        	LOG.warn("Unexpected exception", e);
                             setPeerState(ServerState.LOOKING);
                         }                        
                     }
-                  //aruan 2016/3/20
+                    //aruan 2016/3/20
                     stateInstance.stateChanged(QuorumStateListener.State.LOOKING_LEAVE, this);
                     break;
                 case OBSERVING:
