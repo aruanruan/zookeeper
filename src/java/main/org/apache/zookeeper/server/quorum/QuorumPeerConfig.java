@@ -118,13 +118,14 @@ public class QuorumPeerConfig {
     public void parse(String path) throws ConfigException {
         LOG.info("Reading configuration from: " + path);
        
+        //aruan 2016/03/22
+        Properties cfg = new Properties();
         try {
             File configFile = (new VerifyingFileFactory.Builder(LOG)
                 .warnForRelativePath()
                 .failForNonExistingPath()
                 .build()).create(path);
-                
-            Properties cfg = new Properties();
+            
             FileInputStream in = new FileInputStream(configFile);
             try {
                 cfg.load(in);
@@ -190,6 +191,11 @@ public class QuorumPeerConfig {
                }
            }
         }
+        
+        //aruan 2016/3/20
+        if(stateListenerTypes != null && stateListenerTypes.length() > 0){
+        	QuorumStateHelper.getInstance().initialize(stateListenerTypes, cfg, this);
+        }
     }
 
     // This method gets the version from the end of dynamic file name.
@@ -210,7 +216,9 @@ public class QuorumPeerConfig {
             return null;
         }
     }
-
+    
+  //aruan 2016/3/20
+    private String stateListenerTypes = null;
     /**
      * Parse config from a Properties.
      * @param zkProp Properties to parse from.
@@ -223,8 +231,7 @@ public class QuorumPeerConfig {
         int secureClientPort = 0;
         String clientPortAddress = null;
         String secureClientPortAddress = null;
-        //aruan 2016/3/20
-        String stateListenerTypes = null;
+        
         VerifyingFileFactory vff = new VerifyingFileFactory.Builder(LOG).warnForRelativePath().build();
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
             String key = entry.getKey().toString().trim();
@@ -363,10 +370,7 @@ public class QuorumPeerConfig {
             }
         }
         
-        //aruan 2016/3/20
-        if(stateListenerTypes != null && stateListenerTypes.length() > 0){
-        	QuorumStateHelper.getInstance().initialize(stateListenerTypes, zkProp, this);
-        }
+       
     }
     
    
